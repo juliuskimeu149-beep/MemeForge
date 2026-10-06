@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink-950: #09080d;
+  --color-ink-900: #0f0d15;
+  --color-ink-850: #15121d;
+  --color-ink-800: #1c1826;
+  --color-ink-700: #272234;
+  --color-ink-600: #3a3349;
+  --color-ink-400: #8a82a0;
+  --color-ink-300: #b4adc7;
+
+  --color-pop-pink: #ff3d7f;
+  --color-pop-orange: #ff8a3d;
+  --color-pop-sun: #ffc83d;
+  --color-pop-lime: #c6ff3d;
+  --color-pop-cyan: #3de0ff;
+  --color-pop-violet: #8b5cff;
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-wiggle: wiggle 2.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-sheet-up: sheet-up 0.38s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  --animate-fade-in: fade-in 0.25s ease-out both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    50% { transform: translate3d(0, -14px, 0) rotate(4deg); }
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes sheet-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-ink-950 font-sans text-white antialiased;
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-pop-lime);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .text-gradient {
+    background: linear-gradient(100deg, var(--color-pop-pink), var(--color-pop-orange) 50%, var(--color-pop-sun));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .bg-brand {
+    background: linear-gradient(120deg, var(--color-pop-pink), var(--color-pop-orange) 55%, var(--color-pop-sun));
+  }
+  .shimmer {
+    background: linear-gradient(90deg, rgb(255 255 255 / 0.04) 25%, rgb(255 255 255 / 0.12) 50%, rgb(255 255 255 / 0.04) 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Range slider */
+  .range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 32px;
+    background: transparent;
+    touch-action: pan-y;
+  }
+  .range::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-pop-pink), var(--color-pop-orange)) 0 / var(--fill, 50%) 100% no-repeat,
+      var(--color-ink-700);
+  }
+  .range::-moz-range-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-ink-700);
+  }
+  .range::-moz-range-progress {
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-pop-pink), var(--color-pop-orange));
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    margin-top: -8px;
+    border-radius: 999px;
+    background: white;
+    border: 3px solid var(--color-pop-pink);
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.4);
+  }
+  .range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: white;
+    border: 3px solid var(--color-pop-pink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
