@@ -35,7 +35,9 @@ function emoji(ctx: Ctx, e: string, x: number, y: number, size: number, rotate =
 
 function rrect(ctx: Ctx, x: number, y: number, w: number, h: number, r: number, fill: string | CanvasGradient) {
   ctx.beginPath()
-  ctx.roundRect(x, y, w, h, r)
+  // roundRect is missing on iOS < 16; square corners are an acceptable fallback.
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, r)
+  else ctx.rect(x, y, w, h)
   ctx.fillStyle = fill
   ctx.fill()
 }
@@ -369,21 +371,55 @@ export const TEMPLATES: MemeTemplate[] = [
 
 export const getTemplate = (id: string) => TEMPLATES.find((t) => t.id === id)
 
-const urlCache = new Map<string, string>()
+const THUMB_MAX = 512
+const fullCache = new Map<string, Promise<string>>()
+const thumbCache = new Map<string, Promise<string>>()
+const thumbReady = new Map<string, string>()
 
-/** Renders a template to a JPEG data URL (cached). */
-export function templateUrl(t: MemeTemplate): string {
-  let url = urlCache.get(t.id)
-  if (!url) {
-    const canvas = document.createElement('canvas')
-    canvas.width = t.width
-    canvas.height = t.height
-    const ctx = canvas.getContext('2d')!
-    t.draw(ctx, t.width, t.height)
-    url = canvas.toDataURL('image/jpeg', 0.9)
-    urlCache.set(t.id, url)
+/**
+ * Renders a template to a JPEG object URL. Encoding uses the async toBlob so
+ * it never blocks a frame the way a synchronous toDataURL does.
+ */
+function renderTemplate(t: MemeTemplate, maxSide: number): Promise<string> {
+  try {
+    return drawTemplate(t, maxSide)
+  } catch (err) {
+    return Promise.reject(err)
   }
-  return url
 }
 
-export const templateImage = (t: MemeTemplate) => loadImage(templateUrl(t))
+function drawTemplate(t: MemeTemplate, maxSide: number): Promise<string> {
+  const scale = Math.min(1, maxSide / Math.max(t.width, t.height))
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(t.width * scale)
+  canvas.height = Math.round(t.height * scale)
+  const ctx = canvas.getContext('2d')!
+  ctx.scale(scale, scale)
+  t.draw(ctx, t.width, t.height)
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(URL.createObjectURL(b)) : reject(new Error('Template render failed'))), 'image/jpeg', 0.9),
+  )
+}
+
+function cached(cache: Map<string, Promise<string>>, t: MemeTemplate, maxSide: number): Promise<string> {
+  let p = cache.get(t.id)
+  if (!p) {
+    p = renderTemplate(t, maxSide)
+    p.catch(() => cache.delete(t.id))
+    cache.set(t.id, p)
+  }
+  return p
+}
+
+/** Full-resolution template image for the editor. */
+export const templateImage = (t: MemeTemplate) => cached(fullCache, t, Infinity).then(loadImage)
+
+/** Small card thumbnail URL (cached). */
+export const templateThumb = (t: MemeTemplate) =>
+  cached(thumbCache, t, THUMB_MAX).then((url) => {
+    thumbReady.set(t.id, url)
+    return url
+  })
+
+/** Thumbnail URL if it has already been generated, for instant re-renders. */
+export const readyThumb = (id: string) => thumbReady.get(id)

@@ -82,7 +82,7 @@ export function ExportSheet({ result, onClose, onGallery, onNew }: Props) {
             <Plus className="size-4" /> New meme
           </button>
         </div>
-        {!shareable && <p className="text-center text-xs text-ink-600">Sharing isn’t supported in this browser — download and post it anywhere.</p>}
+        {!shareable && <p className="text-center text-xs text-ink-400">Sharing isn’t supported in this browser — download and post it anywhere.</p>}
       </div>
     </Sheet>
   )

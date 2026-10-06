@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
 import { ArrowRight, ImagePlus, Share2, Smile, Sparkles, Wand2 } from 'lucide-react'
 import { Wordmark } from '../components/Logo'
-import { TEMPLATES, templateUrl } from '../lib/templates'
+import { TEMPLATES } from '../lib/templates'
+import { useTemplateThumbs } from '../hooks/useTemplateThumbs'
 import type { SavedMeme } from '../types'
 
 interface Props {
@@ -20,13 +20,13 @@ const FLOATERS = [
 ]
 
 export function HomeScreen({ memes, onCreate, onUpload, onTemplate, onGallery }: Props) {
-  const thumbs = useMemo(() => TEMPLATES.map((t) => ({ t, url: templateUrl(t) })), [])
+  const thumbs = useTemplateThumbs()
 
   return (
     <div className="mx-auto max-w-5xl px-4 pt-safe sm:px-6">
       <header className="flex h-16 items-center justify-between">
         <Wordmark />
-        <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-ink-300">
+        <span className="hidden items-center gap-1.5 whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-ink-300 min-[360px]:flex">
           <Sparkles className="size-3.5 text-pop-sun" /> AI Meme Studio
         </span>
       </header>
@@ -100,7 +100,7 @@ export function HomeScreen({ memes, onCreate, onUpload, onTemplate, onGallery }:
           </button>
         </div>
         <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
-          {thumbs.map(({ t, url }, i) => (
+          {TEMPLATES.map((t, i) => (
             <button
               key={t.id}
               onClick={() => onTemplate(t.id)}
@@ -108,7 +108,11 @@ export function HomeScreen({ memes, onCreate, onUpload, onTemplate, onGallery }:
               style={{ animationDelay: `${i * 40}ms` }}
             >
               <div className="aspect-square overflow-hidden rounded-3xl bg-ink-800 ring-1 ring-white/10 transition group-hover:ring-pop-lime/60 group-active:scale-95">
-                <img src={url} alt="" className="size-full object-cover transition duration-500 group-hover:scale-110" />
+                {thumbs[t.id] ? (
+                <img src={thumbs[t.id]} alt="" className="size-full animate-fade-in object-cover transition duration-500 group-hover:scale-110" />
+              ) : (
+                <div className="shimmer size-full" />
+              )}
               </div>
               <p className="mt-2 truncate text-sm font-bold">
                 {t.emoji} {t.name}

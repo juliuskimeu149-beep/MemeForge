@@ -42,6 +42,16 @@ export function Slider({ value, min, max, step, onBegin, onChange, label }: Slid
 }
 
 export const COLORS = ['#ffffff', '#000000', '#ffc83d', '#ff3d7f', '#c6ff3d', '#3de0ff', '#8b5cff', '#ff8a3d']
+const COLOR_NAMES: Record<string, string> = {
+  '#ffffff': 'White',
+  '#000000': 'Black',
+  '#ffc83d': 'Yellow',
+  '#ff3d7f': 'Pink',
+  '#c6ff3d': 'Lime',
+  '#3de0ff': 'Cyan',
+  '#8b5cff': 'Purple',
+  '#ff8a3d': 'Orange',
+}
 
 export function Swatches({ value, onPick, onBegin, label }: { value: string; onPick: (c: string, commit: boolean) => void; onBegin: () => void; label: string }) {
   const custom = !COLORS.includes(value.toLowerCase())
@@ -54,7 +64,7 @@ export function Swatches({ value, onPick, onBegin, label }: { value: string; onP
             key={c}
             role="radio"
             aria-checked={active}
-            aria-label={c}
+            aria-label={`${label}: ${COLOR_NAMES[c]}`}
             onClick={() => onPick(c, true)}
             className={`size-9 rounded-full border border-white/20 transition active:scale-90 ${
               active ? 'scale-110 ring-2 ring-pop-lime ring-offset-2 ring-offset-ink-850' : 'hover:scale-105'

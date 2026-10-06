@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   AlignCenter,
   AlignLeft,
@@ -33,6 +33,15 @@ interface TextPanelProps {
 
 export function TextPanel({ layers, selectedId, focusId, onFocused, onSelect, onBegin, onText, onAdd }: TextPanelProps) {
   const refs = useRef(new Map<string, HTMLTextAreaElement>())
+
+  // Auto-grow fallback for browsers without CSS field-sizing (Safari, Firefox).
+  useLayoutEffect(() => {
+    if (CSS.supports('field-sizing', 'content')) return
+    refs.current.forEach((el) => {
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    })
+  }, [layers])
 
   useEffect(() => {
     if (!focusId) return
@@ -72,7 +81,7 @@ export function TextPanel({ layers, selectedId, focusId, onFocused, onSelect, on
                 onBegin()
               }}
               onChange={(e) => onText(l.id, e.target.value)}
-              className="field-sizing-content block max-h-40 min-h-7 w-full resize-none bg-transparent text-lg font-semibold text-white placeholder:text-ink-600 focus:outline-none"
+              className="field-sizing-content block max-h-40 min-h-7 w-full resize-none bg-transparent text-lg font-semibold text-white placeholder:text-ink-400/70 focus:outline-none"
             />
           </label>
         )
@@ -341,7 +350,7 @@ export function AIPanel({ template, isUpload, onApply }: AIPanelProps) {
             >
               {s.lines.map((line, j) => (
                 <span key={j} className="block whitespace-pre-line font-semibold leading-snug">
-                  <span className="mr-1.5 text-xs font-bold text-ink-600">{j + 1}</span>
+                  <span className="mr-1.5 text-xs font-bold text-ink-400">{j + 1}</span>
                   {line}
                 </span>
               ))}
@@ -351,7 +360,7 @@ export function AIPanel({ template, isUpload, onApply }: AIPanelProps) {
             </button>
           ))}
       </div>
-      <p className="text-center text-xs text-ink-600">Suggestions are generated on-device — no data leaves your phone.</p>
+      <p className="text-center text-xs text-ink-400">Suggestions are generated on-device — no data leaves your phone.</p>
     </div>
   )
 }

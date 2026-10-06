@@ -35,13 +35,26 @@ export function MemeCanvas({ image, layers, selectedId, fontsVersion, onSelect, 
 
   const { w: W, h: H } = fitSize(image.naturalWidth, image.naturalHeight, PREVIEW_MAX)
 
+  // Downscale the source once; redrawing a 12MP photo every drag frame is slow on phones.
+  // (Export still renders from the full-resolution image.)
+  const preview = useMemo(() => {
+    if (image.naturalWidth <= W && image.naturalHeight <= H) return image
+    const c = document.createElement('canvas')
+    c.width = W
+    c.height = H
+    const ctx = c.getContext('2d')!
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(image, 0, 0, W, H)
+    return c
+  }, [image, W, H])
+
   useLayoutEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     canvas.width = W
     canvas.height = H
-    renderMeme(canvas.getContext('2d')!, image, layers, W, H)
-  }, [image, layers, W, H, fontsVersion])
+    renderMeme(canvas.getContext('2d')!, preview, layers, W, H)
+  }, [preview, layers, W, H, fontsVersion])
 
   const boxes = useMemo(
     () => new Map(layers.map((l) => [l.id, measureLayer(l, W)])),
@@ -120,7 +133,7 @@ export function MemeCanvas({ image, layers, selectedId, fontsVersion, onSelect, 
             role="button"
             tabIndex={0}
             aria-label={layer.kind === 'text' ? `Text: ${layer.text || layer.placeholder}` : `Sticker ${layer.emoji}`}
-            className={`absolute cursor-grab rounded-lg active:cursor-grabbing ${
+            className={`absolute cursor-grab rounded-lg before:absolute before:left-1/2 before:top-1/2 before:size-full before:min-h-11 before:min-w-11 before:-translate-x-1/2 before:-translate-y-1/2 active:cursor-grabbing ${
               selected
                 ? 'outline-2 outline-dashed outline-pop-lime'
                 : empty
@@ -141,8 +154,8 @@ export function MemeCanvas({ image, layers, selectedId, fontsVersion, onSelect, 
             onPointerCancel={onUp}
             onDoubleClick={() => layer.kind === 'text' && onEditText(layer.id)}
             onKeyDown={(e) => {
+              // Delete/Backspace is handled by the editor-wide shortcut listener.
               if (e.key === 'Enter') onSelect(layer.id)
-              if ((e.key === 'Delete' || e.key === 'Backspace') && selected) onDelete(layer.id)
             }}
           >
             {empty && layer.kind === 'text' && (
@@ -165,7 +178,7 @@ export function MemeCanvas({ image, layers, selectedId, fontsVersion, onSelect, 
               <>
                 <button
                   aria-label="Delete layer"
-                  className="absolute -left-3.5 -top-3.5 grid size-7 place-items-center rounded-full bg-pop-pink text-white shadow-lg ring-2 ring-ink-950"
+                  className="absolute -left-3.5 -top-3.5 grid size-7 before:absolute before:-inset-2.5 place-items-center rounded-full bg-pop-pink text-white shadow-lg ring-2 ring-ink-950"
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -176,7 +189,7 @@ export function MemeCanvas({ image, layers, selectedId, fontsVersion, onSelect, 
                 </button>
                 <div
                   aria-label="Resize"
-                  className="absolute -bottom-3.5 -right-3.5 grid size-7 cursor-nwse-resize place-items-center rounded-full bg-pop-lime text-ink-950 shadow-lg ring-2 ring-ink-950"
+                  className="absolute -bottom-3.5 -right-3.5 grid size-7 before:absolute before:-inset-2.5 cursor-nwse-resize place-items-center rounded-full bg-pop-lime text-ink-950 shadow-lg ring-2 ring-ink-950"
                   style={{ touchAction: 'none' }}
                   onPointerDown={(e) => onScaleDown(e, layer)}
                   onPointerMove={onMove}

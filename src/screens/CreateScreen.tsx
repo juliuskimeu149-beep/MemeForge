@@ -1,6 +1,7 @@
-import { useMemo, useState, type DragEvent } from 'react'
+import { useState, type DragEvent } from 'react'
 import { ImagePlus, UploadCloud } from 'lucide-react'
-import { TEMPLATES, templateUrl } from '../lib/templates'
+import { TEMPLATES } from '../lib/templates'
+import { useTemplateThumbs } from '../hooks/useTemplateThumbs'
 
 interface Props {
   onUpload: () => void
@@ -10,7 +11,7 @@ interface Props {
 
 export function CreateScreen({ onUpload, onFile, onTemplate }: Props) {
   const [dragging, setDragging] = useState(false)
-  const thumbs = useMemo(() => TEMPLATES.map((t) => ({ t, url: templateUrl(t) })), [])
+  const thumbs = useTemplateThumbs()
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault()
@@ -49,12 +50,12 @@ export function CreateScreen({ onUpload, onFile, onTemplate }: Props) {
         </span>
       </button>
 
-      <div className="my-7 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-ink-600">
+      <div className="my-7 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-ink-400">
         <span className="h-px flex-1 bg-white/10" /> or pick a template <span className="h-px flex-1 bg-white/10" />
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {thumbs.map(({ t, url }, i) => (
+        {TEMPLATES.map((t, i) => (
           <button
             key={t.id}
             onClick={() => onTemplate(t.id)}
@@ -62,7 +63,11 @@ export function CreateScreen({ onUpload, onFile, onTemplate }: Props) {
             style={{ animationDelay: `${i * 35}ms` }}
           >
             <div className="aspect-square overflow-hidden bg-ink-800">
-              <img src={url} alt="" className="size-full object-cover transition duration-500 group-hover:scale-110" />
+              {thumbs[t.id] ? (
+                <img src={thumbs[t.id]} alt="" className="size-full animate-fade-in object-cover transition duration-500 group-hover:scale-110" />
+              ) : (
+                <div className="shimmer size-full" />
+              )}
             </div>
             <div className="flex items-center gap-2 px-3.5 py-3">
               <span className="text-xl">{t.emoji}</span>

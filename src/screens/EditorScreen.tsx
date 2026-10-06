@@ -254,9 +254,9 @@ function Editor({ source, image, initial, templateName, onClose, onGallery, onNe
           <button
             onClick={doExport}
             disabled={exporting}
-            className="ml-1 flex h-11 shrink-0 items-center gap-1.5 rounded-2xl bg-pop-lime px-3.5 sm:px-4 font-extrabold text-ink-950 shadow-lg shadow-pop-lime/20 transition hover:brightness-105 active:scale-95"
+            className="ml-1 flex h-11 shrink-0 items-center gap-1.5 rounded-2xl bg-pop-lime px-3 min-[360px]:px-3.5 sm:px-4 font-extrabold text-ink-950 shadow-lg shadow-pop-lime/20 transition hover:brightness-105 active:scale-95"
           >
-            {exporting ? <Loader2 className="size-5 animate-spin" /> : <Wand2 className="size-5" strokeWidth={2.5} />}
+            {exporting ? <Loader2 className="size-5 animate-spin" /> : <Wand2 className="hidden size-5 min-[360px]:block" strokeWidth={2.5} />}
             <span>Done</span>
           </button>
         </div>
@@ -278,7 +278,7 @@ function Editor({ source, image, initial, templateName, onClose, onGallery, onNe
               setFocusId(id)
             }}
           />
-          <p className="mt-3 hidden text-center text-xs text-ink-600 lg:block">Drag to move · tap to select · double-tap text to edit</p>
+          <p className="mt-3 hidden text-center text-xs text-ink-400 lg:block">Drag to move · tap to select · double-tap text to edit</p>
         </section>
 
         <section className="flex min-h-0 flex-1 flex-col lg:block lg:py-8">
